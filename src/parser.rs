@@ -2,9 +2,15 @@ use clap::Parser;
 #[derive(Parser)]
 #[command(name = "AD-Pentest")]
 pub struct Cli {
-    #[arg(short = 'u', long = "user", default_value = "null")]
-    pub user: String,
+    #[arg(short = 'u', long = "user")]
+    pub user: Option<String>,
 
-    #[arg(short = 'p', long = "password", default_value= "null")]
+    #[arg(short = 'p', long = "password", requires = "user")]
     pub password: String,
+
+    #[arg(short = 't', long = "target")]
+    pub target: String,
+
+    #[arg(long)]
+    pub share: Option<String>,
 }
