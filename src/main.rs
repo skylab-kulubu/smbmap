@@ -1,32 +1,46 @@
-use core::panic;
-
 use clap::Parser;
 mod parser;
 use crate::parser::Cli;
+use log::{
+    error,
+    info,
+    warn,
+};
 fn main() {
     let args = Cli::parse();
+    env_logger::init();
+    info!("Target: {}", args.target);
+    info!("Port: {}", args.port);
+    match args.domain {
+        Some(domain) => {
+            info!("Domain: {}", domain);
+        },
+        None => {
+            info!("No domain provided.");
+        }
+    }
     match args.user {
         Some(user) => {
-            println!("User: {}", user);
+            info!("User: {}", user);
             match args.password {
                 Some(password ) => {
-                    println!("Password: {}",password)
+                    info!("Password: {}", password);
                 },
                 None => {
-                    panic!("No password provided!")
+                    error!("No password provided");
                 }
             }
         },
         None => {
-            println!("null user")
+            info!("No user provided, using null user.");
         }
     }
     match args.share {
         Some(share) => {
-            println!("Share: {}", share);
+            info!("Share: {}", share);
         },
         None => {
-            println!("no share enum")
+            info!("No share provided, no share enum.");
         }
         
     }
