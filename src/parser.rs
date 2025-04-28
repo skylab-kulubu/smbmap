@@ -11,6 +11,12 @@ pub struct Cli {
     #[arg(short = 't', long = "target")]
     pub target: String,
 
-    #[arg(long)]
+    #[arg(short = 'P', long = "port", default_value = "445")]
+    pub port: Option<String>,
+
+    #[arg(short = 'd', long = "domain")]
+    pub domain: Option<String>,
+
+    #[arg(short = 'S',long = "share")]
     pub share: Option<String>,
 }
