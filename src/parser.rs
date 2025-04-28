@@ -1,5 +1,5 @@
 use clap::Parser;
-#[derive(Parser)]
+#[derive(Parser,Debug)]
 #[command(name = "AD-Pentest")]
 pub struct Cli {
     #[arg(short = 'u', long = "user")]
