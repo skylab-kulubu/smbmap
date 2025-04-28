@@ -12,7 +12,7 @@ pub struct Cli {
     pub target: String,
 
     #[arg(short = 'P', long = "port", default_value = "445")]
-    pub port: Option<String>,
+    pub port: u16,
 
     #[arg(short = 'd', long = "domain")]
     pub domain: Option<String>,
