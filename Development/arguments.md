@@ -11,48 +11,23 @@ clap = { version = "4.1", features = ["derive"] }
 
 ```rust name=main.rs
 use clap::Parser;
-
-/// Program to process user credentials
-#[derive(Parser)]
-#[command(name = "myprogram")]
-#[command(about = "A simple program to handle user credentials", long_about = None)]
-struct Cli {
-    /// Username to authenticate
+#[derive(Parser,Debug)]
+#[command(name = "AD-Pentest")]
+pub struct Cli {
+    // Vaule increases with letter count, -v -vv -vvv etc.
+    #[arg(short = 'v', long = "verbose", action = clap::ArgAction::Count)]
+    pub verbose: u8,
+    
+    // Optional
     #[arg(short = 'u', long = "user")]
-    user: String,
+    pub user: Option<String>,
 
-    /// Password to authenticate
-    #[arg(short = 'p', long = "password")]
-    password: String,
+    // Required
+    #[arg(short = 't', long = "target")]
+    pub target: String,
+
+    // Has default value if it is not setted
+    #[arg(short = 'P', long = "port", default_value = "445")]
+    pub port: u16,
 }
-
-fn main() {
-    let args = Cli::parse();
-
-    println!("Username: {}", args.user);
-    println!("Password: {}", args.password);
-}
-```
-
-## Usage
-
-### Development
-
-```bash
-cargo run -- -u alice -p wonderland123
-```
-
-```bash
-cargo run -- --user alice --password wonderland123
-```
-
-
-### Release
-
-```bash
-./ad-pentest --user alice --pasword wonderland123
-```
-
-```bash
-./ad-pentest -u alice -p wonderland123
 ```
