@@ -1,13 +1,13 @@
-# Logging
-```bash
-RUST_LOG=info cargo run -- -t target ... 
-```
+```plaintext
+Usage: ad-pentest [OPTIONS] --target <TARGET>
 
-```bash
-RUST_LOG=warn cargo run -- -t target ...
+Options:
+  -v, --verbose...           
+  -u, --user <USER>          
+  -p, --password <PASSWORD>  
+  -t, --target <TARGET>      
+  -P, --port <PORT>          [default: 445]
+  -d, --domain <DOMAIN>      
+  -S, --share <SHARE>        
+  -h, --help                 Print help
 ```
-
-```bash
-RUST_LOG=error cargo run -- -t target ...
-```
-or just use `-v` parameter
