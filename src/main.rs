@@ -1,3 +1,5 @@
+use core::panic;
+
 use clap::Parser;
 mod parser;
 use crate::parser::Cli;
@@ -6,10 +8,17 @@ fn main() {
     match args.user {
         Some(user) => {
             println!("User: {}", user);
-            println!("Password: {}", args.password);
+            match args.password {
+                Some(password ) => {
+                    println!("Password: {}",password)
+                },
+                None => {
+                    panic!("No password provided!")
+                }
+            }
         },
         None => {
-            print!("null user")
+            println!("null user")
         }
     }
     match args.share {
@@ -17,7 +26,7 @@ fn main() {
             println!("Share: {}", share);
         },
         None => {
-            print!("no share enum")
+            println!("no share enum")
         }
         
     }
