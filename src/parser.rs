@@ -2,6 +2,9 @@ use clap::Parser;
 #[derive(Parser,Debug)]
 #[command(name = "AD-Pentest")]
 pub struct Cli {
+    #[arg(short = 'v', long = "verbose", action = clap::ArgAction::Count)]
+    pub verbose: u8,
+
     #[arg(short = 'u', long = "user")]
     pub user: Option<String>,
 
