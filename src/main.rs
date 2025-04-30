@@ -161,8 +161,7 @@ fn print_infos(args: &Cli) {
                     info!("Password: {}", password);
                 }
                 None => {
-                    error!("No password provided");
-                    exit(1)
+                    warn!("No password provided with user.");
                 }
             }
         }
