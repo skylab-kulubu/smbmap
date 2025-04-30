@@ -3,6 +3,30 @@ use log::warn;
 use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbOptions};
 use prettytable::{Cell, Row, Table};
 
+pub fn dir_share(client: &SmbClient, share: &str) {
+    let files= match client.list_dir(share) {
+        Ok(shares) => shares,
+        Err(_) => {
+            let shares: Vec<SmbDirent> = Vec::new();
+            shares
+        }
+    };
+    let mut table = Table::new();
+    table.add_row(Row::new(vec![
+        Cell::new("Name"),
+        Cell::new("Type"),
+        Cell::new("Comment"),
+    ]));
+    for file in files {
+        table.add_row(Row::new(vec![
+            Cell::new(file.name()),
+            Cell::new(&format!("{:?}", file.get_type())),
+            Cell::new(file.comment()),
+        ]));
+    }
+    table.printstd();
+}
+
 pub fn list_shares(args: &Cli) {
     match (&args.user, &args.password) {
         (Some(user), Some(password)) => {
@@ -24,7 +48,7 @@ pub fn list_shares(args: &Cli) {
     }
 }
 
-fn get_smbclient_with_login(args: &Cli, user: &String, password: &String) -> SmbClient {
+pub fn get_smbclient_with_login(args: &Cli, user: &String, password: &String) -> SmbClient {
     let client = SmbClient::new(
         SmbCredentials::default()
             .server(format!("smb://{}:{}", &args.target, &args.port))
@@ -51,7 +75,7 @@ fn list_shares_guest(args: &Cli) {
     print_shares_table(shares);
 }
 
-fn get_smbclient_guest(args: &Cli) -> SmbClient {
+pub fn get_smbclient_guest(args: &Cli) -> SmbClient {
     let client = SmbClient::new(
         SmbCredentials::default()
             .server(format!("smb://{}:{}", &args.target, &args.port))
@@ -80,7 +104,7 @@ fn list_shares_without_login(args: &Cli) {
     list_shares_guest(args);
 }
 
-fn get_smbclient_null(args: &Cli) -> SmbClient {
+pub fn get_smbclient_null(args: &Cli) -> SmbClient {
     let client = SmbClient::new(
         SmbCredentials::default()
             .server(format!("smb://{}:{}", &args.target, &args.port))

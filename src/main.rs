@@ -15,6 +15,18 @@ fn main() {
     info!("Port: {}", args.port);
     print_infos(&args);
     list_shares(&args);
+    let client = match (&args.user, &args.password) {
+        (Some(user), Some(password)) => {
+            get_smbclient_with_login(&args, user, password)
+        }
+        (None, None) => {
+            get_smbclient_guest(&args)
+        }
+        (None, Some(_)) => get_smbclient_guest(&args),
+        (Some(_), None) => get_smbclient_guest(&args),
+        
+    };
+    dir_share(&client, &args.share.unwrap_or("".to_string()));
 }
 
 fn set_verbosity(args: &Cli) {
