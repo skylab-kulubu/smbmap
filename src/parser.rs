@@ -17,7 +17,7 @@ pub struct Cli {
     #[arg(short = 'P', long = "port", default_value = "445")]
     pub port: u16,
 
-    #[arg(short = 'd', long = "domain")]
+    #[arg(short = 'D', long = "domain")]
     pub domain: Option<String>,
 
     #[arg(short = 'S',long = "share")]
