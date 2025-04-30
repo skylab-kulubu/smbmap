@@ -1,5 +1,5 @@
 use clap::Parser;
-use pavao::{SmbClient, SmbCredentials, SmbOpenOptions, SmbOptions};
+use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbOptions};
 use std::process::exit;
 mod parser;
 use crate::parser::Cli;
@@ -34,19 +34,66 @@ fn list_shares(args: &Cli) {
             .unwrap();
             let shares = match client.list_dir("") {
                 Ok(shares) => shares,
-                Err(e) => {
-                    error!("Error listing shares: {}", e);
-                    exit(1);
+                Err(_) => {
+                    let shares: Vec<SmbDirent> = Vec::new();
+                    shares
                 }
             };
             print_shares_table(shares);
         }
         (None, None) => {
-            info!("No user provided, using null user.");
+            list_shares_without_login(args);
         }
-        (None, Some(_)) => info!("No user provided, using null user."),
-        (Some(_), None) => info!("No password provided, using null user."),
+        (None, Some(_)) => list_shares_without_login(args),
+        (Some(_), None) => list_shares_without_login(args),
     }
+}
+
+
+fn list_shares_guest(args: &Cli) {
+    let client = SmbClient::new(
+        SmbCredentials::default()
+            .server(format!("smb://{}:{}", &args.target, &args.port))
+            .share("")
+            .password(" ")
+            .username(" "),
+        SmbOptions::default()
+            .case_sensitive(true)
+            .one_share_per_server(true),
+    )
+    .unwrap();
+    let shares = match client.list_dir("") {
+        Ok(shares) => shares,
+        Err(_) => {
+            let shares: Vec<SmbDirent> = Vec::new();
+            shares
+        }
+    };
+    print_shares_table(shares);
+}
+
+fn list_shares_without_login(args: &Cli) {
+    warn!("No user or password provided, using null user.");
+    let client = SmbClient::new(
+        SmbCredentials::default()
+            .server(format!("smb://{}:{}", &args.target, &args.port))
+            .share("")
+            .password("")
+            .username(""),
+        SmbOptions::default()
+            .case_sensitive(true)
+            .one_share_per_server(true),
+    )
+    .unwrap();
+    let shares = match client.list_dir("") {
+        Ok(shares) => shares,
+        Err(_) => {
+            let shares: Vec<SmbDirent> = Vec::new();
+            shares
+        }
+    };
+    print_shares_table(shares);
+    list_shares_guest(args);
 }
 
 fn print_shares_table(shares: Vec<pavao::SmbDirent>) {
