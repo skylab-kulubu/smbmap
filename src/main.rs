@@ -39,20 +39,7 @@ fn list_shares(args: &Cli) {
                     exit(1);
                 }
             };
-            let mut table = Table::new();
-            table.add_row(Row::new(vec![
-                Cell::new("Share"),
-                Cell::new("Type"),
-                Cell::new("Comment"),
-            ]));
-            for share in shares {
-                table.add_row(Row::new(vec![
-                    Cell::new(share.name()),
-                    Cell::new(&format!("{:?}", share.get_type())),
-                    Cell::new(share.comment()),
-                ]));
-            }
-            table.printstd();
+            print_shares_table(shares);
         }
         (None, None) => {
             info!("No user provided, using null user.");
@@ -60,6 +47,23 @@ fn list_shares(args: &Cli) {
         (None, Some(_)) => info!("No user provided, using null user."),
         (Some(_), None) => info!("No password provided, using null user."),
     }
+}
+
+fn print_shares_table(shares: Vec<pavao::SmbDirent>) {
+    let mut table = Table::new();
+    table.add_row(Row::new(vec![
+        Cell::new("Share"),
+        Cell::new("Type"),
+        Cell::new("Comment"),
+    ]));
+    for share in shares {
+        table.add_row(Row::new(vec![
+            Cell::new(share.name()),
+            Cell::new(&format!("{:?}", share.get_type())),
+            Cell::new(share.comment()),
+        ]));
+    }
+    table.printstd();
 }
 
 fn set_verbosity(args: &Cli) {
