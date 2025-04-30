@@ -39,8 +39,12 @@ fn main() {
                         }
                         
                     };
-                    info!("Shares: {:?}", shares); 
-                    println!("Client: {:?}", client.list_dir(""));
+                    let spacing = "     ";
+                    print!("Sharename{spacing}|{spacing}Type{spacing}|{spacing}Comment\n");
+                    print!("--------------------------------------\n");
+                    for share in shares {
+                        println!("{:?}{spacing}|{spacing}{:?}{spacing}|{spacing}{:?}", share.name(), share.get_type(), share.comment());
+                    }
             },
         (None, None) => info!("No user and password provided, using null user."),
         (None, Some(_)) => info!("No user provided, using null user."),
