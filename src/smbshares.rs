@@ -3,8 +3,8 @@ use log::warn;
 use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbOptions};
 use prettytable::{Cell, Row, Table};
 
-pub fn dir_share(client: &SmbClient, share: &str) {
-    let files= match client.list_dir(share) {
+pub fn dir_share(client: &SmbClient, path: &str) {
+    let files= match client.list_dir(path) {
         Ok(shares) => shares,
         Err(_) => {
             let shares: Vec<SmbDirent> = Vec::new();
@@ -30,7 +30,7 @@ pub fn dir_share(client: &SmbClient, share: &str) {
 pub fn list_shares(args: &Cli) {
     match (&args.user, &args.password) {
         (Some(user), Some(password)) => {
-            let client = get_smbclient_with_login(args, user, password);
+            let client = get_smbclient_with_login(args, user, password,args.share.as_ref().unwrap());
             let shares = match client.list_dir("") {
                 Ok(shares) => shares,
                 Err(_) => {
@@ -48,11 +48,11 @@ pub fn list_shares(args: &Cli) {
     }
 }
 
-pub fn get_smbclient_with_login(args: &Cli, user: &String, password: &String) -> SmbClient {
+pub fn get_smbclient_with_login(args: &Cli, user: &String, password: &String,share: &String) -> SmbClient {
     let client = SmbClient::new(
         SmbCredentials::default()
             .server(format!("smb://{}:{}", &args.target, &args.port))
-            .share("")
+            .share(share)
             .password(password.to_string())
             .username(user.to_string()),
         SmbOptions::default()

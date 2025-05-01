@@ -22,4 +22,7 @@ pub struct Cli {
 
     #[arg(short = 'S',long = "share")]
     pub share: Option<String>,
+
+    #[arg(long)]
+    pub path: Option<String>,
 }

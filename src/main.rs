@@ -1,8 +1,8 @@
 use clap::Parser;
 mod parser;
 mod smbshares;
-use crate::smbshares::*;
 use crate::parser::Cli;
+use crate::smbshares::*;
 #[allow(unused_imports)]
 use log::{error, info, warn};
 use std::env;
@@ -15,18 +15,16 @@ fn main() {
     info!("Port: {}", args.port);
     print_infos(&args);
     list_shares(&args);
-    let client = match (&args.user, &args.password) {
-        (Some(user), Some(password)) => {
-            get_smbclient_with_login(&args, user, password)
+    let client = match (&args.user, &args.password, &args.share) {
+        (Some(user), Some(password), Some(share)) => {
+            get_smbclient_with_login(&args, user, password, share)
         }
-        (None, None) => {
-            get_smbclient_guest(&args)
-        }
-        (None, Some(_)) => get_smbclient_guest(&args),
-        (Some(_), None) => get_smbclient_guest(&args),
-        
+        (None, None, _) => get_smbclient_guest(&args),
+        (None, Some(_), _) => get_smbclient_guest(&args),
+        (Some(_), None, _) => get_smbclient_guest(&args),
+        (Some(_), Some(_), None) => get_smbclient_guest(&args),
     };
-    dir_share(&client, &args.share.unwrap_or("".to_string()));
+    dir_share(&client, &args.path.unwrap_or("".to_string()));
 }
 
 fn set_verbosity(args: &Cli) {
