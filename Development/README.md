@@ -7,7 +7,8 @@ Options:
   -p, --password <PASSWORD>  
   -t, --target <TARGET>      
   -P, --port <PORT>          [default: 445]
-  -d, --domain <DOMAIN>      
+  -D, --domain <DOMAIN>      
   -S, --share <SHARE>        
+      --path <PATH>          
   -h, --help                 Print help
 ```
