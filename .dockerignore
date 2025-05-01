@@ -1,1 +1,5 @@
 /target
+/Development
+README.md
+Dockerfile
+.gitignore
