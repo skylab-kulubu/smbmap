@@ -1,0 +1,12 @@
+version: "3.1"
+
+services:
+  samba:
+    image: dperson/samba
+    container_name: samba
+    ports:
+      - "139:139"
+      - "445:445"
+    volumes:
+      - ./testing:/testing
+    command: ["-u", "kullanici1;1234", "-s", "testing;/testing;yes;no;yes"]
