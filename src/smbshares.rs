@@ -3,6 +3,7 @@ use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbOptions};
 use prettytable::{Cell, Row, Table};
 
 pub fn dir_share(client: Option<&SmbClient>, path: &str) {
+    let path = ensure_leading_slash(path);
     let files = match client.unwrap().list_dir(path) {
         Ok(shares) => shares,
         Err(_) => {
@@ -24,6 +25,14 @@ pub fn dir_share(client: Option<&SmbClient>, path: &str) {
         ]));
     }
     table.printstd();
+}
+
+fn ensure_leading_slash(path: &str) -> String{
+    if !path.starts_with("/") {
+        format!("{}{}", "/", path)
+    } else {
+        path.to_string()
+    }
 }
 
 pub fn list_shares(
@@ -75,18 +84,6 @@ pub fn get_smbclient_with_login(
     client
 }
 
-fn list_shares_guest(target: &String, port: &u16) {
-    let client = get_smbclient_guest(target, port);
-    let shares = match client.list_dir("") {
-        Ok(shares) => shares,
-        Err(_) => {
-            let shares: Vec<SmbDirent> = Vec::new();
-            shares
-        }
-    };
-    print_shares_table(&shares);
-}
-
 pub fn get_smbclient_guest(target: &String, port: &u16) -> SmbClient {
     let client = SmbClient::new(
         SmbCredentials::default()
@@ -113,7 +110,6 @@ fn list_shares_without_login(target: &String, port: &u16) {
         }
     };
     print_shares_table(&shares);
-    list_shares_guest(&target, port);
 }
 
 pub fn get_smbclient_null(target: &String, port: &u16) -> SmbClient {
