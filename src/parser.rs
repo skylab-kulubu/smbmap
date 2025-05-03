@@ -28,7 +28,7 @@ pub enum Commands {
         #[arg(short = 'D', long = "domain")]
         domain: Option<String>,
 
-        #[arg(short = 'S', long = "share")]
+        #[arg(short = 'S', long = "share", default_value = "")]
         share: Option<String>,
 
         #[arg(long)]
