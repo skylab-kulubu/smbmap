@@ -1,7 +1,7 @@
-FROM rust:1.86.0
+FROM rust:1.86.0-slim
 
 RUN apt-get update && \
-  apt-get install libsmbclient-dev -y
+    apt-get install pkg-config libsmbclient-dev -y
 
 WORKDIR /src
 
