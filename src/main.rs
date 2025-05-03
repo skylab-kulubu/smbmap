@@ -45,7 +45,7 @@ fn main() {
                         (Some(_), None, _) => get_smbclient_guest(&args.target, &port),
                     };
                     dir_share(Some(&client), &path.unwrap_or("".to_string()));
-                }
+                },
                 None => list_shares(
                     Some(&user.clone().unwrap()),
                     Some(&password.clone().unwrap()),
