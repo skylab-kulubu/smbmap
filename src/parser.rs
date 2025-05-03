@@ -33,5 +33,8 @@ pub enum Commands {
 
         #[arg(long)]
         path: Option<String>,
+
+        #[arg(long, action = clap::ArgAction::SetTrue)]
+        tree: bool,
     },
 }

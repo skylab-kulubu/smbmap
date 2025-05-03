@@ -22,6 +22,7 @@ fn main() {
             domain,
             share,
             path,
+            tree,
         } => {
             info!("Command: Smb");
             info!("User: {:?}", user);
@@ -30,30 +31,33 @@ fn main() {
             info!("Domain: {:?}", domain);
             info!("Share: {:?}", share);
             info!("Path: {:?}", path);
-
-            match share {
-                Some(share) => {
-                    let client = match (user, password, share) {
-                        (Some(user), Some(password), share) => get_smbclient_with_login(
-                            &args.target,
-                            &port,
-                            Some(&user),
-                            Some(&password),
-                            Some(&share),
-                        ),
-                        (None, None, _) => get_smbclient_guest(&args.target, &port),
-                        (None, Some(_), _) => get_smbclient_guest(&args.target, &port),
-                        (Some(_), None, _) => get_smbclient_guest(&args.target, &port),
-                    };
-                    dir_share(Some(&client), &path.unwrap_or("".to_string()));
-                }
-                None => list_shares(
-                    Some(&user.clone().unwrap()),
-                    Some(&password.clone().unwrap()),
-                    Some(&"".to_string()),
-                    &args.target,
-                    &port,
-                ),
+            warn!("Tree View: {:?}", tree);
+            match tree {
+                true => todo!(),
+                false => match share {
+                    Some(share) => {
+                        let client = match (user, password, share) {
+                            (Some(user), Some(password), share) => get_smbclient_with_login(
+                                &args.target,
+                                &port,
+                                Some(&user),
+                                Some(&password),
+                                Some(&share),
+                            ),
+                            (None, None, _) => get_smbclient_guest(&args.target, &port),
+                            (None, Some(_), _) => get_smbclient_guest(&args.target, &port),
+                            (Some(_), None, _) => get_smbclient_guest(&args.target, &port),
+                        };
+                        dir_share(Some(&client), &path.unwrap_or("".to_string()));
+                    }
+                    None => list_shares(
+                        Some(&user.clone().unwrap()),
+                        Some(&password.clone().unwrap()),
+                        Some(&"".to_string()),
+                        &args.target,
+                        &port,
+                    ),
+                },
             }
         }
     }
