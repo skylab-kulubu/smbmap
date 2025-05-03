@@ -31,7 +31,7 @@ pub enum Commands {
         #[arg(short = 'S', long = "share", default_value = "")]
         share: Option<String>,
 
-        #[arg(long)]
+        #[arg(long, default_value = "")]
         path: Option<String>,
     },
 }
