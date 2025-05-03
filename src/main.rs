@@ -12,19 +12,54 @@ fn main() {
     set_verbosity(&args);
     env_logger::init();
     info!("Target: {}", args.target);
-    info!("Port: {}", args.port);
-    print_infos(&args);
-    list_shares(&args);
-    let client = match (&args.user, &args.password, &args.share) {
-        (Some(user), Some(password), Some(share)) => {
-            get_smbclient_with_login(&args, user, password, share)
+
+    match args.command {
+        parser::Commands::Smb {
+            user,
+            password,
+            port,
+            domain,
+            share,
+            path,
+        } => {
+            info!("Command: Smb");
+            info!("User: {:?}", user);
+            info!("Password: {:?}", password);
+            info!("Port: {}", port);
+            info!("Domain: {:?}", domain);
+            info!("Share: {:?}", share);
+            info!("Path: {:?}", path);
+            list_shares(
+                Some(&user.clone().unwrap()),
+                Some(&password.clone().unwrap()),
+                Some(&share.clone().unwrap()),
+                &args.target,
+                &port,
+            );
+
+            let client = match (user, password, share) {
+                (Some(user), Some(password), Some(share)) => get_smbclient_with_login(
+                    &args.target,
+                    &port,
+                    Some(&user),
+                    Some(&password),
+                    Some(&share),
+                ),
+                (None, None, _) => get_smbclient_guest(&args.target, &port),
+                (None, Some(_), _) => {
+                    get_smbclient_guest(&args.target, &port)
+                }
+                (Some(_), None, _) => {
+                    get_smbclient_guest(&args.target, &port)
+                }
+                (Some(_), Some(_), None) => {
+                    get_smbclient_guest(&args.target, &port)
+                }
+            };
+            dir_share(Some(&client), &path.unwrap_or("".to_string()));
         }
-        (None, None, _) => get_smbclient_guest(&args),
-        (None, Some(_), _) => get_smbclient_guest(&args),
-        (Some(_), None, _) => get_smbclient_guest(&args),
-        (Some(_), Some(_), None) => get_smbclient_guest(&args),
-    };
-    dir_share(&client, &args.path.unwrap_or("".to_string()));
+    }
+    {}
 }
 
 fn set_verbosity(args: &Cli) {
@@ -39,41 +74,6 @@ fn set_verbosity(args: &Cli) {
     } else if args.verbose > 2 {
         unsafe {
             env::set_var("RUST_LOG", "info");
-        }
-    }
-}
-
-fn print_infos(args: &Cli) {
-    match &args.domain {
-        Some(domain) => {
-            info!("Domain: {}", domain);
-        }
-        None => {
-            info!("No domain provided.");
-        }
-    }
-    match &args.user {
-        Some(user) => {
-            info!("User: {}", user);
-            match &args.password {
-                Some(password) => {
-                    info!("Password: {}", password);
-                }
-                None => {
-                    warn!("No password provided with user.");
-                }
-            }
-        }
-        None => {
-            info!("No user provided, using null user.");
-        }
-    }
-    match &args.share {
-        Some(share) => {
-            info!("Share: {}", share);
-        }
-        None => {
-            info!("No share provided, no share enum.");
         }
     }
 }

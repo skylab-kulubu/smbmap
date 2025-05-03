@@ -1,10 +1,9 @@
-use crate::parser::Cli;
 use log::warn;
 use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbOptions};
 use prettytable::{Cell, Row, Table};
 
-pub fn dir_share(client: &SmbClient, path: &str) {
-    let files= match client.list_dir(path) {
+pub fn dir_share(client: Option<&SmbClient>, path: &str) {
+    let files = match client.unwrap().list_dir(path) {
         Ok(shares) => shares,
         Err(_) => {
             let shares: Vec<SmbDirent> = Vec::new();
@@ -27,10 +26,17 @@ pub fn dir_share(client: &SmbClient, path: &str) {
     table.printstd();
 }
 
-pub fn list_shares(args: &Cli) {
-    match (&args.user, &args.password) {
+pub fn list_shares(
+    user: Option<&String>,
+    password: Option<&String>,
+    share: Option<&String>,
+    target: &String,
+    port: &u16,
+) {
+    match (user, password) {
         (Some(user), Some(password)) => {
-            let client = get_smbclient_with_login(args, user, password,args.share.as_ref().unwrap());
+            let client =
+                get_smbclient_with_login(&target, port, Some(&user), Some(&password), share);
             let shares = match client.list_dir("") {
                 Ok(shares) => shares,
                 Err(_) => {
@@ -38,23 +44,29 @@ pub fn list_shares(args: &Cli) {
                     shares
                 }
             };
-            print_shares_table(shares);
+            print_shares_table(&shares);
         }
         (None, None) => {
-            list_shares_without_login(args);
+            list_shares_without_login(target, port);
         }
-        (None, Some(_)) => list_shares_without_login(args),
-        (Some(_), None) => list_shares_without_login(args),
+        (None, Some(_)) => list_shares_without_login(&target, port),
+        (Some(_), None) => list_shares_without_login(&target, port),
     }
 }
 
-pub fn get_smbclient_with_login(args: &Cli, user: &String, password: &String,share: &String) -> SmbClient {
+pub fn get_smbclient_with_login(
+    target: &String,
+    port: &u16,
+    user: Option<&String>,
+    password: Option<&String>,
+    share: Option<&String>,
+) -> SmbClient {
     let client = SmbClient::new(
         SmbCredentials::default()
-            .server(format!("smb://{}:{}", &args.target, &args.port))
-            .share(share)
-            .password(password.to_string())
-            .username(user.to_string()),
+            .server(format!("smb://{}:{}", target, port))
+            .share(share.unwrap())
+            .password(password.unwrap())
+            .username(user.unwrap()),
         SmbOptions::default()
             .case_sensitive(true)
             .one_share_per_server(true),
@@ -63,8 +75,8 @@ pub fn get_smbclient_with_login(args: &Cli, user: &String, password: &String,sha
     client
 }
 
-fn list_shares_guest(args: &Cli) {
-    let client = get_smbclient_guest(args);
+fn list_shares_guest(target: &String, port: &u16) {
+    let client = get_smbclient_guest(target, port);
     let shares = match client.list_dir("") {
         Ok(shares) => shares,
         Err(_) => {
@@ -72,13 +84,13 @@ fn list_shares_guest(args: &Cli) {
             shares
         }
     };
-    print_shares_table(shares);
+    print_shares_table(&shares);
 }
 
-pub fn get_smbclient_guest(args: &Cli) -> SmbClient {
+pub fn get_smbclient_guest(target: &String, port: &u16) -> SmbClient {
     let client = SmbClient::new(
         SmbCredentials::default()
-            .server(format!("smb://{}:{}", &args.target, &args.port))
+            .server(format!("smb://{:?}:{:?}", target,port))
             .share("")
             .password(" ")
             .username(" "),
@@ -90,9 +102,9 @@ pub fn get_smbclient_guest(args: &Cli) -> SmbClient {
     client
 }
 
-fn list_shares_without_login(args: &Cli) {
+fn list_shares_without_login(target: &String, port: &u16) {
     warn!("No user or password provided, using null user.");
-    let client = get_smbclient_null(args);
+    let client = get_smbclient_null(target, port);
     let shares = match client.list_dir("") {
         Ok(shares) => shares,
         Err(_) => {
@@ -100,14 +112,14 @@ fn list_shares_without_login(args: &Cli) {
             shares
         }
     };
-    print_shares_table(shares);
-    list_shares_guest(args);
+    print_shares_table(&shares);
+    list_shares_guest(&target, port);
 }
 
-pub fn get_smbclient_null(args: &Cli) -> SmbClient {
+pub fn get_smbclient_null(target: &String, port: &u16) -> SmbClient {
     let client = SmbClient::new(
         SmbCredentials::default()
-            .server(format!("smb://{}:{}", &args.target, &args.port))
+            .server(format!("smb://{:?}:{:?}", target, port))
             .share("")
             .password("")
             .username(""),
@@ -119,7 +131,7 @@ pub fn get_smbclient_null(args: &Cli) -> SmbClient {
     client
 }
 
-fn print_shares_table(shares: Vec<pavao::SmbDirent>) {
+fn print_shares_table(shares: &Vec<pavao::SmbDirent>) {
     let mut table = Table::new();
     table.add_row(Row::new(vec![
         Cell::new("Share"),
