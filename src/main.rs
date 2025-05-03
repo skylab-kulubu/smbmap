@@ -8,6 +8,7 @@ use log::{error, info, warn};
 use std::env;
 fn main() {
     let args = Cli::parse();
+    #[cfg(debug_assertions)]
     dbg!(&args);
     set_verbosity(&args);
     env_logger::init();
@@ -45,7 +46,7 @@ fn main() {
                         (Some(_), None, _) => get_smbclient_guest(&args.target, &port),
                     };
                     dir_share(Some(&client), &path.unwrap_or("".to_string()));
-                },
+                }
                 None => list_shares(
                     Some(&user.clone().unwrap()),
                     Some(&password.clone().unwrap()),
@@ -54,7 +55,6 @@ fn main() {
                     &port,
                 ),
             }
-
         }
     }
     {}
