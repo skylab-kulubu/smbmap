@@ -1,6 +1,8 @@
 use log::warn;
-use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbOptions};
+use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOptions};
 use prettytable::{Cell, Row, Table};
+use std::future::Future;
+use std::pin::Pin;
 
 pub async fn dir_share(client: Option<&SmbClient>, path: &str) {
     let path = ensure_leading_slash(path).await;
@@ -53,10 +55,10 @@ pub async fn list_shares(
                     shares
                 }
             };
-            let _ = print_shares_table(&shares);
+             print_shares_table(&shares).await;
         }
         (None, None) => {
-            let _ = list_shares_without_login(target, port);
+             list_shares_without_login(target, port).await;
         }
         (None, Some(_)) => list_shares_without_login(&target, port).await,
         (Some(_), None) => list_shares_without_login(&target, port).await,
@@ -109,7 +111,7 @@ pub async fn list_shares_without_login(target: &String, port: &u16) {
             shares
         }
     };
-    let _ = print_shares_table(&shares);
+    print_shares_table(&shares).await;
 }
 
 pub async fn get_smbclient_null(target: &String, port: &u16) -> SmbClient {
@@ -142,4 +144,31 @@ pub async fn print_shares_table(shares: &Vec<pavao::SmbDirent>) {
         ]));
     }
     table.printstd();
+}
+
+pub fn print_tree_view<'a>(
+    client: Option<&'a SmbClient>,
+    path: &'a String,
+    depth: usize,
+) -> Pin<Box<dyn Future<Output = ()> + 'a>> {
+    Box::pin(async move {
+        let path = ensure_leading_slash(path).await;
+        let files = match client.unwrap().list_dir(&path) {
+            Ok(entries) => entries,
+            Err(_) => {
+                warn!("Failed to list directory: {}", &path);
+                return;
+            }
+        };
+
+        for file in files {
+            let indent = " -".repeat(depth);
+            println!("{}- {}", indent, file.name());
+
+            if file.get_type() == SmbDirentType::Dir {
+                let sub_path = format!("{}/{}", path.trim_end_matches('/'), file.name());
+                print_tree_view(client, &sub_path, depth + 1).await;
+            }
+        }
+    })
 }

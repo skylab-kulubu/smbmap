@@ -5,7 +5,7 @@ use crate::parser::Cli;
 use crate::smbshares::*;
 #[allow(unused_imports)]
 use log::{error, info, warn};
-use std::env;
+use std::{env, process::exit};
 #[tokio::main]
 async fn main() {
     let args = Cli::parse();
@@ -34,30 +34,66 @@ async fn main() {
             info!("Path: {:?}", path);
             warn!("Tree View: {:?}", tree);
             match tree {
-                true => todo!(),
-                false => match share {
+                true => match share {
                     Some(share) => {
                         let client = match (user, password, share) {
-                            (Some(user), Some(password), share) => get_smbclient_with_login(
-                                &args.target,
-                                &port,
-                                Some(&user),
-                                Some(&password),
-                                Some(&share),
-                            ).await,
+                            (Some(user), Some(password), share) => {
+                                get_smbclient_with_login(
+                                    &args.target,
+                                    &port,
+                                    Some(&user),
+                                    Some(&password),
+                                    Some(&share),
+                                )
+                                .await
+                            }
                             (None, None, _) => get_smbclient_guest(&args.target, &port).await,
                             (None, Some(_), _) => get_smbclient_guest(&args.target, &port).await,
                             (Some(_), None, _) => get_smbclient_guest(&args.target, &port).await,
                         };
-                        let _ = dir_share(Some(&client), &path.unwrap_or("".to_string()));
+                        print_tree_view(
+                            Some(&client),
+                            &path.unwrap_or("".to_string()),
+                            0,
+                        )
+                        .await;
                     }
-                    None => list_shares(
-                        Some(&user.clone().unwrap()),
-                        Some(&password.clone().unwrap()),
-                        Some(&"".to_string()),
-                        &args.target,
-                        &port,
-                    ).await,
+                    None => {
+                        error!("Share is required for tree view");
+                        error!("Please provide a share name with -S or --share");
+                        exit(1)
+                    }
+                },
+                false => match share {
+                    Some(share) => {
+                        let client = match (user, password, share) {
+                            (Some(user), Some(password), share) => {
+                                get_smbclient_with_login(
+                                    &args.target,
+                                    &port,
+                                    Some(&user),
+                                    Some(&password),
+                                    Some(&share),
+                                )
+                                .await
+                            }
+                            (None, None, _) => get_smbclient_guest(&args.target, &port).await,
+                            (None, Some(_), _) => get_smbclient_guest(&args.target, &port).await,
+                            (Some(_), None, _) => get_smbclient_guest(&args.target, &port).await,
+                        };
+                        dir_share(Some(&client), &path.unwrap_or("".to_string())).await;
+                    }
+                    None => {
+                        info!("No share provided, listing all shares");
+                        list_shares(
+                            Some(&user.clone().unwrap()),
+                            Some(&password.clone().unwrap()),
+                            Some(&"".to_string()),
+                            &args.target,
+                            &port,
+                        )
+                        .await
+                    }
                 },
             }
         }
