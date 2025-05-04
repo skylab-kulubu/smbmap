@@ -6,11 +6,12 @@ use crate::smbshares::*;
 #[allow(unused_imports)]
 use log::{error, info, warn};
 use std::env;
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Cli::parse();
     #[cfg(debug_assertions)]
     dbg!(&args);
-    set_verbosity(&args);
+    let _ = set_verbosity(&args);
     env_logger::init();
     info!("Target: {}", args.target);
 
@@ -43,12 +44,12 @@ fn main() {
                                 Some(&user),
                                 Some(&password),
                                 Some(&share),
-                            ),
-                            (None, None, _) => get_smbclient_guest(&args.target, &port),
-                            (None, Some(_), _) => get_smbclient_guest(&args.target, &port),
-                            (Some(_), None, _) => get_smbclient_guest(&args.target, &port),
+                            ).await,
+                            (None, None, _) => get_smbclient_guest(&args.target, &port).await,
+                            (None, Some(_), _) => get_smbclient_guest(&args.target, &port).await,
+                            (Some(_), None, _) => get_smbclient_guest(&args.target, &port).await,
                         };
-                        dir_share(Some(&client), &path.unwrap_or("".to_string()));
+                        let _ = dir_share(Some(&client), &path.unwrap_or("".to_string()));
                     }
                     None => list_shares(
                         Some(&user.clone().unwrap()),
@@ -56,7 +57,7 @@ fn main() {
                         Some(&"".to_string()),
                         &args.target,
                         &port,
-                    ),
+                    ).await,
                 },
             }
         }
@@ -64,7 +65,7 @@ fn main() {
     {}
 }
 
-fn set_verbosity(args: &Cli) {
+async fn set_verbosity(args: &Cli) {
     if args.verbose == 0 {
         unsafe {
             env::set_var("RUST_LOG", "error");
