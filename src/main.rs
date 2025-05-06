@@ -82,9 +82,10 @@ async fn main() {
                             (None, Some(_), _) => get_smbclient_guest(&args.target, &port).await,
                             (Some(_), None, _) => get_smbclient_guest(&args.target, &port).await,
                         };
-                        match read_file {
-                            Some(read_file) => read_file_func(&client, &read_file).await,
-                            None => dir_share(Some(&client), &path.unwrap_or("".to_string())).await,
+                        if read_file != None {
+                            read_file_func(&client, &read_file.unwrap()).await;
+                        } else {
+                            dir_share(Some(&client), &path.unwrap_or("".to_string())).await;
                         }
                     }
                     None => {
