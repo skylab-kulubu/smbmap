@@ -11,6 +11,9 @@ pub struct Cli {
 
     #[command(subcommand)]
     pub command: Commands,
+
+    #[arg(long = "disable-banner",action = clap::ArgAction::SetFalse)]
+    pub disable_banner: bool,
 }
 
 #[derive(Subcommand, Debug)]

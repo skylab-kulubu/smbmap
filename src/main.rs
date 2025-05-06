@@ -1,17 +1,22 @@
 use clap::Parser;
 mod parser;
 mod smb;
+mod utils;
 use crate::parser::Cli;
 use crate::smb::*;
+use crate::utils::print_banner;
 #[allow(unused_imports)]
 use log::{error, info, warn};
 use std::{env, process::exit};
 #[tokio::main]
 async fn main() {
     let args = Cli::parse();
+    if args.disable_banner {
+        tokio::spawn(print_banner());
+    }
     #[cfg(debug_assertions)]
     dbg!(&args);
-    let _ = set_verbosity(&args);
+    tokio::spawn(set_verbosity(args.verbose.clone()));
     env_logger::init();
     info!("Target: {}", args.target);
 
@@ -114,16 +119,17 @@ async fn main() {
     }
 }
 
-async fn set_verbosity(args: &Cli) {
-    if args.verbose == 0 {
+async fn set_verbosity(verbose: u8) {
+    let verbose = verbose as u32;
+    if verbose == 0 {
         unsafe {
             env::set_var("RUST_LOG", "error");
         }
-    } else if args.verbose == 1 {
+    } else if verbose == 1 {
         unsafe {
             env::set_var("RUST_LOG", "warn");
         }
-    } else if args.verbose > 2 {
+    } else if verbose > 2 {
         unsafe {
             env::set_var("RUST_LOG", "info");
         }
