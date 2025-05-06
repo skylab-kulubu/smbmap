@@ -41,7 +41,7 @@ pub enum Commands {
         #[arg(long = "read-file")]
         read_file: Option<String>,
 
-        /// Install the file provived in --path or --read-file 
+        /// Install the file provived in --path or --read-file
         #[arg(long = "write-file",action = clap::ArgAction::SetTrue)]
         write_file: Option<String>,
     },

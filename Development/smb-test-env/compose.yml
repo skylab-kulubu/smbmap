@@ -1,12 +1,26 @@
-version: "3.1"
-
+version: '3.7'
 services:
-  samba:
-    image: dperson/samba
-    container_name: samba
-    ports:
-      - "139:139"
-      - "445:445"
+  samba-ad:
+    image: dperson/samba:latest
+    container_name: samba-ad
+    cap_add:
+      - SYS_ADMIN
+    environment:
+      - USER_NAME=administrator
+      - USER_PASSWORD=Passw0rd!
+      - DOMAIN=SKYSEC
+      - REALM=SKYSEC.LOCAL
+      - DNS_BACKEND=SAMBA_INTERNAL
     volumes:
-      - ./testing:/testing
-    command: ["-u", "kullanici1;1234", "-s", "testing;/testing;yes;yes;yes"]
+      - ./data:/var/lib/samba
+      - ./config/smb.conf:/etc/samba/smb.conf
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+      - "88:88/tcp"
+      - "389:389/tcp"
+      - "464:464/tcp"
+      - "636:636/tcp"
+      - "3268:3268/tcp"
+      - "3269:3269/tcp"
+    restart: unless-stopped
