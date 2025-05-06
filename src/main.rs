@@ -86,8 +86,8 @@ async fn main() {
                     None => {
                         info!("No share provided, listing all shares");
                         list_shares(
-                            Some(&user.clone().unwrap()),
-                            Some(&password.clone().unwrap()),
+                            Some(&user.clone().unwrap_or("".to_string())),
+                            Some(&password.clone().unwrap_or("".to_string())),
                             Some(&"".to_string()),
                             &args.target,
                             &port,
