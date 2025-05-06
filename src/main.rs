@@ -1,8 +1,8 @@
 use clap::Parser;
 mod parser;
-mod smbshares;
+mod smb;
 use crate::parser::Cli;
-use crate::smbshares::*;
+use crate::smb::*;
 #[allow(unused_imports)]
 use log::{error, info, warn};
 use std::{env, process::exit};
