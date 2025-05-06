@@ -55,7 +55,7 @@ pub async fn list_shares(
                     shares
                 }
             };
-             print_shares_table(&shares).await;
+            print_shares_table(&shares).await;
         }
         (None, None) => {
              list_shares_without_login(target, port).await;
@@ -101,7 +101,7 @@ pub async fn get_smbclient_guest(target: &String, port: &u16) -> SmbClient {
     client
 }
 
-pub async fn list_shares_without_login(target: &String, port: &u16) {
+async fn list_shares_without_login(target: &String, port: &u16) {
     warn!("No user or password provided, using null user.");
     let client = get_smbclient_null(target, port).await;
     let shares = match client.list_dir("") {
@@ -114,7 +114,7 @@ pub async fn list_shares_without_login(target: &String, port: &u16) {
     print_shares_table(&shares).await;
 }
 
-pub async fn get_smbclient_null(target: &String, port: &u16) -> SmbClient {
+async fn get_smbclient_null(target: &String, port: &u16) -> SmbClient {
     let client = SmbClient::new(
         SmbCredentials::default()
             .server(format!("smb://{:?}:{:?}", target, port))
@@ -129,7 +129,7 @@ pub async fn get_smbclient_null(target: &String, port: &u16) -> SmbClient {
     client
 }
 
-pub async fn print_shares_table(shares: &Vec<pavao::SmbDirent>) {
+async fn print_shares_table(shares: &Vec<pavao::SmbDirent>) {
     let mut table = Table::new();
     table.add_row(Row::new(vec![
         Cell::new("Share"),
