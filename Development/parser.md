@@ -1,114 +1,96 @@
-This file defines the command-line interface (CLI) structure for the `AD-Pentest` tool using the `clap` crate. It specifies the main CLI arguments and subcommands that the tool supports.
+farukerdem34: write documentation
 
-## Overview
-
-The parser.rs file uses the `clap` crate to define and parse command-line arguments. It consists of two main components:
-
-1. **`Cli` Struct**: Represents the top-level CLI structure, including global arguments and subcommands.
-2. **`Commands` Enum**: Defines the subcommands and their specific arguments.
+GitHub Copilot: Here is the documentation for the provided code:
 
 ---
 
-## `Cli` Struct
+# AD-Pentest CLI Documentation
 
-The `Cli` struct is the entry point for parsing command-line arguments. It includes global options and a subcommand.
+This CLI tool, **AD-Pentest**, is designed to facilitate Active Directory penetration testing. It provides a set of commands and arguments to interact with SMB services and perform various operations.
 
-### Fields
+## Global Arguments
 
-- **`verbose`** (`u8`):
-  - **Description**: Controls the verbosity level of the tool. The verbosity increases with each occurrence of the `-v` or `--verbose` flag.
-  - **Usage**: `-v`, `--verbose`
-  - **Type**: Counted flag (e.g., `-vv` for higher verbosity).
+The following arguments are available globally and apply to all commands:
 
-- **target** (`String`):
-  - **Description**: Specifies the target for the pentest operation.
-  - **Usage**: `-t <TARGET>`, `--target <TARGET>`
-  - **Type**: Required argument.
+- **`-v, --verbose`**  
+  Increases the verbosity of the output. Use multiple times to increase verbosity further.  
+  *Type*: `u8` (count of occurrences)
 
-- **`command`** (`Commands`):
-  - **Description**: Specifies the subcommand to execute. The subcommands are defined in the `Commands` enum.
+- **`-t, --target`**  
+  Specifies the target system to interact with.  
+  *Type*: `String`  
+  *Required*: Yes
+
+## Commands
+
+### `smb`
+
+The `smb` command is used to interact with SMB services. It supports the following arguments:
+
+- **`-u, --user`**  
+  Specifies the username for authentication.  
+  *Type*: `Option<String>`  
+  *Required*: No
+
+- **`-p, --password`**  
+  Specifies the password for authentication.  
+  *Type*: `Option<String>`  
+  *Required*: No
+
+- **`-P, --port`**  
+  Specifies the port to connect to.  
+  *Type*: `u16`  
+  *Default*: `445`
+
+- **`-D, --domain`**  
+  Specifies the domain for authentication.  
+  *Type*: `Option<String>`  
+  *Required*: No
+
+- **`-S, --share`**  
+  Specifies the SMB share to interact with.  
+  *Type*: `Option<String>`  
+  *Required*: No
+
+- **`--path`**  
+  Specifies the path to a file or directory on the SMB share.  
+  *Type*: `Option<String>`  
+  *Required*: No
+
+- **`--tree`**  
+  Enables tree listing of the specified SMB share.  
+  *Type*: `bool`  
+  *Default*: `false`
+
+- **`--read-file`**  
+  Specifies a file to read from the SMB share. Alternatively, you can use the `--path` parameter to specify the file path.  
+  *Type*: `Option<String>`  
+  *Required*: No
+
+- **`--write-file`**  
+  Installs the file provided in `--path` or `--read-file` to the SMB share.  
+  *Type*: `Option<String>`  
+  *Required*: No
 
 ---
 
-## `Commands` Enum
+### Example Usage
 
-The `Commands` enum defines the subcommands supported by the tool. Currently, it includes the `Smb` subcommand.
-
-### Subcommands
-
-#### `Smb`
-
-The `Smb` subcommand is used for operations related to SMB (Server Message Block) protocol.
-
-##### Arguments
-
-- **`user`** (`Option<String>`):
-  - **Description**: Specifies the username for SMB authentication.
-  - **Usage**: `-u <USER>`, `--user <USER>`
-  - **Type**: Optional.
-
-- **`password`** (`Option<String>`):
-  - **Description**: Specifies the password for SMB authentication.
-  - **Usage**: `-p <PASSWORD>`, `--password <PASSWORD>`
-  - **Type**: Optional.
-
-- **`port`** (`u16`):
-  - **Description**: Specifies the port for the SMB connection.
-  - **Usage**: `-P <PORT>`, `--port <PORT>`
-  - **Default Value**: `445`
-
-- **`domain`** (`Option<String>`):
-  - **Description**: Specifies the domain for SMB authentication.
-  - **Usage**: `-D <DOMAIN>`, `--domain <DOMAIN>`
-  - **Type**: Optional.
-
-- **`share`** (`Option<String>`):
-  - **Description**: Specifies the SMB share to access.
-  - **Usage**: `-S <SHARE>`, `--share <SHARE>`
-  - **Type**: Optional.
-
-- **`path`** (`Option<String>`):
-  - **Description**: Specifies the path within the SMB share.
-  - **Usage**: `--path <PATH>`
-  - **Type**: Optional.
-
-- **`tree`** (`bool`):
-  - **Description**: Enables tree listing of the SMB share.
-  - **Usage**: `--tree`
-  - **Type**: Boolean flag (set to `true` if provided).
-
----
-
-## Example Usage
-
-Here are some example commands for using the `AD-Pentest` tool:
-
-1. **Basic SMB Command**:
-
+1. **Basic SMB Command**  
    ```bash
-   ad-pentest -t 192.168.1.1 smb --user admin --password secret
+   ad-pentest -t 192.168.1.10 smb --user admin --password secret --share public --tree
    ```
 
-2. **SMB Command with Tree Listing**:
-
+2. **Read a File**  
    ```bash
-   ad-pentest -t 192.168.1.1 smb --user admin --password secret --tree
+   ad-pentest -t 192.168.1.10 smb --user admin --password secret --read-file example.txt
    ```
 
-3. **Verbose Output**:
-
+3. **Write a File**  
    ```bash
-   ad-pentest -vv -t 192.168.1.1 smb --share public
+   ad-pentest -t 192.168.1.10 smb --user admin --password secret --path /local/path/to/file --write-file
    ```
 
 ---
 
-## Notes
-
-- The `clap` crate is used to handle argument parsing and validation.
-- The `Commands` enum can be extended to include additional subcommands in the future.
-
----
-
-This documentation provides a clear understanding of the CLI structure and usage for the `AD-Pentest` tool.
-
+This documentation provides an overview of the CLI's functionality and usage. For further details, refer to the source code or additional documentation.
