@@ -1,5 +1,5 @@
 use log::{error, warn};
-use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOpenOptions, SmbOptions};
+use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbFile, SmbOpenOptions, SmbOptions};
 use prettytable::{Cell, Row, Table};
 use std::future::Future;
 use std::io::Read;
@@ -174,16 +174,24 @@ pub fn print_tree_view<'a>(
     })
 }
 
-pub async fn read_file_func(client: &SmbClient, file_name: &String) {
+pub async fn get_file_string<'a>(client: &'a SmbClient, file_name: &String) -> SmbFile<'a> {
     let file_name = ensure_leading_slash(&file_name).await;
     let mut file = match client.open_with(&file_name, SmbOpenOptions::default().read(true)) {
         Ok(file) => file,
         Err(e) => {
-            error!("Failed to open file: {}", e);
-            return;
+            panic!("Failed to open file: {}", e);
         }
     };
     let mut buffer = String::new();
     let _ = file.read_to_string(&mut buffer);
-    println!("{}:\n {}", file_name,buffer);
+    file
+}
+
+pub async fn read_file_func(client: &SmbClient, file_name: &String) {
+    let mut file = get_file_string(client, file_name).await;
+    let mut buffer = String::new();
+    if let Err(e) = file.read_to_string(&mut buffer) {
+        panic!("Failed to read file content: {}", e);
+    }
+    println!("{}:\n{}", file_name, buffer);
 }
