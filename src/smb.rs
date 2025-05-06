@@ -1,8 +1,12 @@
-use log::{error, warn};
-use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbFile, SmbOpenOptions, SmbOptions};
+use log::{info, warn};
+use pavao::{
+    SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbFile, SmbOpenOptions, SmbOptions,
+};
 use prettytable::{Cell, Row, Table};
+use std::fs::File;
 use std::future::Future;
 use std::io::Read;
+use std::io::Write;
 use std::pin::Pin;
 
 pub async fn dir_share(client: Option<&SmbClient>, path: &str) {
@@ -174,7 +178,7 @@ pub fn print_tree_view<'a>(
     })
 }
 
-pub async fn get_file_string<'a>(client: &'a SmbClient, file_name: &String) -> SmbFile<'a> {
+async fn get_file_string<'a>(client: &'a SmbClient, file_name: &String) -> SmbFile<'a> {
     let file_name = ensure_leading_slash(&file_name).await;
     let mut file = match client.open_with(&file_name, SmbOpenOptions::default().read(true)) {
         Ok(file) => file,
@@ -194,4 +198,28 @@ pub async fn read_file_func(client: &SmbClient, file_name: &String) {
         panic!("Failed to read file content: {}", e);
     }
     println!("{}:\n{}", file_name, buffer);
+}
+pub async fn write_file_func(
+    client: &SmbClient,
+    remote_file_name: &String,
+    local_file_name: &String,
+) {
+    let mut smb_file = get_file_string(client, remote_file_name).await;
+    let mut buffer = Vec::new();
+    if let Err(e) = smb_file.read_to_end(&mut buffer) {
+        panic!("Failed to read file content: {}", e);
+    }
+
+    let mut local_file = match File::create(local_file_name) {
+        Ok(file) => file,
+        Err(e) => {
+            panic!("Failed to create local file: {}", e);
+        }
+    };
+
+    if let Err(e) = local_file.write_all(&buffer) {
+        panic!("Failed to write to local file: {}", e);
+    }
+
+    info!("File written to {}", local_file_name);
 }

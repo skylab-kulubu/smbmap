@@ -25,6 +25,7 @@ async fn main() {
             path,
             tree,
             mut read_file,
+            write_file,
         } => {
             info!("Command: Smb");
             info!("User: {:?}", user);
@@ -84,6 +85,14 @@ async fn main() {
                         };
                         if read_file != None {
                             read_file_func(&client, &read_file.unwrap()).await;
+                            if write_file != None {
+                                write_file_func(
+                                    &client,
+                                    &path.expect("You have to provide a path to install a file!"),
+                                    &write_file.unwrap(),
+                                )
+                                .await;
+                            }
                         } else {
                             dir_share(Some(&client), &path.unwrap_or("".to_string())).await;
                         }

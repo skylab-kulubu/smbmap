@@ -40,5 +40,9 @@ pub enum Commands {
         /// You can provide a files to this paramater or just write the path of the file to --path paramater
         #[arg(long = "read-file")]
         read_file: Option<String>,
+
+        /// Install the file provived in --path or --read-file 
+        #[arg(long = "write-file",action = clap::ArgAction::SetTrue)]
+        write_file: Option<String>,
     },
 }
