@@ -24,6 +24,7 @@ async fn main() {
             share,
             path,
             tree,
+            mut read_file,
         } => {
             info!("Command: Smb");
             info!("User: {:?}", user);
@@ -33,6 +34,11 @@ async fn main() {
             info!("Share: {:?}", share);
             info!("Path: {:?}", path);
             warn!("Tree View: {:?}", tree);
+            if let Some(ref path) = path {
+                if path.contains('.') {
+                    read_file = Some(path.clone());
+                }
+            }
             match tree {
                 true => match share {
                     Some(share) => {
@@ -51,12 +57,7 @@ async fn main() {
                             (None, Some(_), _) => get_smbclient_guest(&args.target, &port).await,
                             (Some(_), None, _) => get_smbclient_guest(&args.target, &port).await,
                         };
-                        print_tree_view(
-                            Some(&client),
-                            &path.unwrap_or("".to_string()),
-                            0,
-                        )
-                        .await;
+                        print_tree_view(Some(&client), &path.unwrap_or("".to_string()), 0).await;
                     }
                     None => {
                         error!("Share is required for tree view");
@@ -81,7 +82,10 @@ async fn main() {
                             (None, Some(_), _) => get_smbclient_guest(&args.target, &port).await,
                             (Some(_), None, _) => get_smbclient_guest(&args.target, &port).await,
                         };
-                        dir_share(Some(&client), &path.unwrap_or("".to_string())).await;
+                        match read_file {
+                            Some(read_file) => read_file_func(&client, &read_file).await,
+                            None => dir_share(Some(&client), &path.unwrap_or("".to_string())).await,
+                        }
                     }
                     None => {
                         info!("No share provided, listing all shares");
@@ -98,7 +102,6 @@ async fn main() {
             }
         }
     }
-    {}
 }
 
 async fn set_verbosity(args: &Cli) {

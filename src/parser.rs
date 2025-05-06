@@ -36,5 +36,9 @@ pub enum Commands {
 
         #[arg(long, action = clap::ArgAction::SetTrue)]
         tree: bool,
+
+        /// You can provide a files to this paramater or just write the path of the file to --path paramater
+        #[arg(long = "read-file")]
+        read_file: Option<String>,
     },
 }

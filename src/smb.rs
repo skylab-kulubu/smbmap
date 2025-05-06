@@ -1,7 +1,8 @@
-use log::warn;
-use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOptions};
+use log::{error, warn};
+use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOpenOptions, SmbOptions};
 use prettytable::{Cell, Row, Table};
 use std::future::Future;
+use std::io::Read;
 use std::pin::Pin;
 
 pub async fn dir_share(client: Option<&SmbClient>, path: &str) {
@@ -58,7 +59,7 @@ pub async fn list_shares(
             print_shares_table(&shares).await;
         }
         (None, None) => {
-             list_shares_without_login(target, port).await;
+            list_shares_without_login(target, port).await;
         }
         (None, Some(_)) => list_shares_without_login(&target, port).await,
         (Some(_), None) => list_shares_without_login(&target, port).await,
@@ -171,4 +172,18 @@ pub fn print_tree_view<'a>(
             }
         }
     })
+}
+
+pub async fn read_file_func(client: &SmbClient, file_name: &String) {
+    let file_name = ensure_leading_slash(&file_name).await;
+    let mut file = match client.open_with(&file_name, SmbOpenOptions::default().read(true)) {
+        Ok(file) => file,
+        Err(e) => {
+            error!("Failed to open file: {}", e);
+            return;
+        }
+    };
+    let mut buffer = String::new();
+    let _ = file.read_to_string(&mut buffer);
+    println!("{}:\n {}", file_name,buffer);
 }
