@@ -223,3 +223,26 @@ pub async fn write_file_func(
 
     info!("File written to {}", local_file_name);
 }
+
+pub async fn get_basic_info(client: &SmbClient) {
+    let netbios_name = client.get_netbios_name();
+    let workgroup = client.get_workgroup();
+    let version = client.get_version();
+    let context = client.ctx();
+    let mut table = Table::new();
+    table.add_row(Row::new(vec![
+        Cell::new("NetBIOS Name"),
+        Cell::new("Workgroup"),
+        Cell::new("Version"),
+        Cell::new("Context"),
+    ]));
+    table.add_row(Row::new(vec![
+        Cell::new(&netbios_name.expect("Could'nt get NetBIOS name.")),
+        Cell::new(&workgroup.expect("Could'nt get Workgroup.")),
+        Cell::new(&version.expect("Could'nt get Version.")),
+        Cell::new(
+            &format!("{:?}", context.expect("Could'nt get Context.")),
+        ),
+    ]));
+
+}
