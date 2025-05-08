@@ -48,7 +48,7 @@ pub enum Commands {
         #[arg(long = "write-file",action = clap::ArgAction::SetTrue)]
         write_file: Option<String>,
 
-        #[arg(long = "less-info",action = clap::ArgAction::SetFalse)]
+        #[arg(long = "less-info",action = clap::ArgAction::SetTrue)]
         less_info: bool,
     },
 }
