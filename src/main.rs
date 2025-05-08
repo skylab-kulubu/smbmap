@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 use clap::Parser;
 mod parser;
 mod smb;
@@ -31,6 +34,7 @@ async fn main() {
             tree,
             mut read_file,
             write_file,
+            less_info
         } => {
             info!("Command: Smb");
             info!("User: {:?}", user);
@@ -88,6 +92,7 @@ async fn main() {
                             (None, Some(_), _) => get_smbclient_guest(&args.target, &port).await,
                             (Some(_), None, _) => get_smbclient_guest(&args.target, &port).await,
                         };
+                        // get_basic_info(&client).await;
                         if read_file != None {
                             read_file_func(&client, &read_file.unwrap()).await;
                             if write_file != None {

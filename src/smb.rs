@@ -244,5 +244,6 @@ pub async fn get_basic_info(client: &SmbClient) {
             &format!("{:?}", context.expect("Could'nt get Context.")),
         ),
     ]));
+    print!("{}\n", table);
 
 }

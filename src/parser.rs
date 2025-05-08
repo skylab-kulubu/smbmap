@@ -47,5 +47,8 @@ pub enum Commands {
         /// Install the file provived in --path or --read-file
         #[arg(long = "write-file",action = clap::ArgAction::SetTrue)]
         write_file: Option<String>,
+
+        #[arg(long = "less-info",action = clap::ArgAction::SetFalse)]
+        less_info: bool,
     },
 }
