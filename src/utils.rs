@@ -1,3 +1,5 @@
+use std::env;
+
 pub async fn print_banner() {
     let banner = r#"
  ▗▄▖  ▗▄▄▖▗▄▄▄▖▗▄▄▄▖▗▖  ▗▖▗▄▄▄▖    ▗▄▄▄ ▗▄▄▄▖▗▄▄▖ ▗▄▄▄▖ ▗▄▄▖▗▄▄▄▖▗▄▖ ▗▄▄▖▗▖  ▗▖    ▗▄▄▖ ▗▄▄▄▖▗▖  ▗▖▗▄▄▄▖▗▄▄▄▖ ▗▄▄▖▗▄▄▄▖▗▄▄▄▖▗▄▄▖ 
@@ -10,4 +12,21 @@ pub async fn print_banner() {
 ▐▙▄▞▘ ▐▌      ▗▄▄▞▘▐▌ ▐▌  ▐▌ ▗▄▄▞▘▐▙▄▄▖▝▚▄▄▖                                                                                     
     "#;
     println!("{}", banner);
+}
+
+pub async fn set_verbosity(verbose: u8) {
+    let verbose = verbose as u32;
+    if verbose == 0 {
+        unsafe {
+            env::set_var("RUST_LOG", "error");
+        }
+    } else if verbose == 1 {
+        unsafe {
+            env::set_var("RUST_LOG", "warn");
+        }
+    } else if verbose > 2 {
+        unsafe {
+            env::set_var("RUST_LOG", "info");
+        }
+    }
 }

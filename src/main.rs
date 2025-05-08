@@ -1,16 +1,15 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-
 use clap::Parser;
 mod parser;
 mod smb;
 mod utils;
 use crate::parser::Cli;
 use crate::smb::*;
-use crate::utils::print_banner;
+use crate::utils::*;
 #[allow(unused_imports)]
 use log::{error, info, warn};
-use std::{env, process::exit};
+use std::process::exit;
 #[tokio::main]
 async fn main() {
     let args = Cli::parse();
@@ -124,19 +123,3 @@ async fn main() {
     }
 }
 
-async fn set_verbosity(verbose: u8) {
-    let verbose = verbose as u32;
-    if verbose == 0 {
-        unsafe {
-            env::set_var("RUST_LOG", "error");
-        }
-    } else if verbose == 1 {
-        unsafe {
-            env::set_var("RUST_LOG", "warn");
-        }
-    } else if verbose > 2 {
-        unsafe {
-            env::set_var("RUST_LOG", "info");
-        }
-    }
-}
